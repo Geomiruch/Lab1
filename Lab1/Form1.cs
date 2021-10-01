@@ -34,7 +34,7 @@ namespace Lab1
                 {
                     richTextBox1.AppendText(line);
 
-                    richTextBox1.AppendText("\r\n");
+                    //richTextBox1.AppendText("\r\n");
 
                     line = sr.ReadLine();
                 }
@@ -52,29 +52,141 @@ namespace Lab1
         }
         public string encrypt(string msg, int key)
         {
+            int length_s = msg.Length;
+
+
+            int columns = length_s / key;
+            if (length_s % key != 0)
+            {
+                columns += 1;
+            }
+            char[,] matrix = new char[key,columns];
+            int count = 0;
+
+            for (int j = 0; j < columns; j++)
+            {
+
+                for (int i = key - 1; i >= 0; i--)
+                {
+                    if (count < length_s)
+                    {
+                        matrix[i,j] = msg[count];
+                        count += 1;
+                    }
+                    else
+                    {
+                        matrix[i,j] = '$';
+                    }
+
+                }
+            }
+            
+
+
+            int counter = 0;
             string result = "";
             for (int i = 0; i < key; i++)
             {
-                for (int j = 0; i + j < msg.Length; j += key)
+                for (int j = 0; j < columns; j++)
                 {
-                    result += msg[i + j];
+                    if (matrix[i,j] != '$')
+                    {
+                        result += matrix[i,j];
+                        counter++;
+                    }
+
                 }
             }
+
+
             return result;
         }
 
         public string decrypt(string msg, int key)
         {
-            StringBuilder result = new StringBuilder(msg);
-            int k = 0;
+            int length_s = msg.Length;
+
+            string result = "";
+            int columns = length_s / key;
+            bool odd = true;
+            if (length_s % key != 0)
+            {
+                columns += 1;
+                odd = false;
+            }
+            char[,] matrix = new char[key,columns];
+            int count = 0;
+            
+            if (odd == true)
+            {
+                for (int i = 0; i < key; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        matrix[i,j] = msg[count];
+                        count += 1;
+                    }
+                }
+                
+            }
+            else
+            {
+                for (int i = 0; i < key; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        if (j == columns - 1)
+                        {
+                            matrix[i,j] = '$';
+                        }
+                    }
+                }
+                int remain = length_s % key;
+                int counter = length_s - remain;
+                for (int i = key - 1; i > key - 1 - remain; i--)
+                {
+                    matrix[i,columns - 1] = ' ';
+                }
+
+
+                for (int i = 0; i < key; i++)
+                {
+                    for (int j = 0; j < columns; j++)
+                    {
+                        if (matrix[i,j]!='$')
+                        {
+                            matrix[i, j] = msg[count];
+                            count += 1;
+                        }
+
+                    }
+                }
+
+
+            }
             for (int i = 0; i < key; i++)
             {
-                for (int j = 0; i + j < msg.Length; j += key)
+                for (int j = 0; j < columns; j++)
                 {
-                    result[i + j] = msg[k++];
+                    richTextBox4.Text += matrix[i, j];
+                }
+                richTextBox4.Text += "\n";
+
+            }
+
+
+            for (int j = 0; j < columns; j++)
+            {
+
+                for (int i = key - 1; i >= 0; i--)
+                {
+                    if (matrix[i,j] != '$')
+                    {
+                        result += matrix[i,j];
+                    }
                 }
             }
-            return result.ToString();
+            return result;
         }
     }
 }
